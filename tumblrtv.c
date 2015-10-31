@@ -1,60 +1,69 @@
-#include<stdlib.h>
-#include<X11/Xlib.h>
-#include<gdk/gdk.h>
-#include<glib/glib.h>
+#include <gtk/gtk.h>
+#include <webkit2/webkit2.h>
 
-#include "vroot.h"
 
-main ()
+char* url = "https://www.tumblr.com/tv/@computersarerad";
+static void destroyWindowCb(GtkWidget* widget, GtkWidget* window);
+//static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
+
+int main(int argc, char* argv[])
 {
-  Display *dpy;
-  Window root;
-  XWindowAttributes wa;
-  /* graphics context */
-  GC g;
-  /* gdk display */
-  GdkDisplay gdk_display;
+    // Initialize GTK+
+    gtk_init(&argc, &argv);
 
+    // Create an 800x600 window that will contain the browser instance
+    GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size(GTK_WINDOW(main_window), 800, 600);
 
-  /* open the display (connect to the X server) */
-  dpy = XOpenDisplay (getenv ("DISPLAY"));
+    // Create a browser instance
+    WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
+    // Put the browser area into the main window
+    gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
 
-  /* get the root window */
-  root = DefaultRootWindow (dpy);
+    // Set up callbacks so that if either the main window or the browser instance is
+    // closed, the program will exit
+    g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindowCb), NULL);
+		//TODO is this necessary
+    //g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), main_window);
 
-  // for things like window size, etc
-  XGetWindowAttributes(dpy, root, &wa);
+    // Load a web page into the browser instance
+    webkit_web_view_load_uri(webView, url);
 
+    // Make sure that when the browser area becomes visible, it will get mouse
+    // and keyboard events
+    gtk_widget_grab_focus(GTK_WIDGET(webView));
 
-  /* create a GC for drawing in the window */
-  g = XCreateGC (dpy, root, 0, NULL);
+    // Make sure the main window and all its contents are visible
+    gtk_widget_show_all(main_window);
 
+    // Run the main GTK+ event loop
+    gtk_main();
 
-  // https://developer.gnome.org/gdk3/stable/gdk3-X-Window-System-Interaction.html#gdk-x11-window-foreign-new-for-display
-  gdk_x11_window_foreign_new_for_display(gdk_display, root);
-
-  /* set foreground color */
-  XSetForeground(dpy, g, WhitePixelOfScreen(DefaultScreenOfDisplay(dpy)) );
-
-
-  /* draw something */
-  while (1)
-    {
-      /* draw a square */
-      XFillRectangle (dpy, root, g, random()%500, random()%500, 50, 40);
-
-
-      /* once in a while, clear all */
-      if( random()%500<1 )
-        XClearWindow(dpy, root);
-
-
-      /* flush changes and sleep */
-      XFlush(dpy);
-      usleep (10);
-    }
-
-
-  XCloseDisplay (dpy);
+    return 0;
 }
+
+
+static void destroyWindowCb(GtkWidget* widget, GtkWidget* window)
+{
+    gtk_main_quit();
+}
+/*
+
+//TODO: when this callback is hooked up, closing the window gives:
+//(WebKitWebProcess:7873): Gdk-ERROR **: The program 'WebKitWebProcess' received an X Window System error.
+//This probably reflects a bug in the program.
+//The error was 'BadDrawable (invalid Pixmap or Window parameter)'.
+//  (Details: serial 285 error_code 9 request_code 14 (core protocol) minor_code 0)
+//  (Note to programmers: normally, X errors are reported asynchronously;
+//   that is, you will receive the error a while after causing it.
+//   To debug your program, run it with the GDK_SYNCHRONIZE environment
+//   variable to change this behavior. You can then get a meaningful
+//   backtrace from your debugger if you break on the gdk_x_error() function.)
+
+static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window)
+{
+    gtk_widget_destroy(window);
+    return TRUE;
+}
+*/

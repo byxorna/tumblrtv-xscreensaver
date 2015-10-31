@@ -1,7 +1,7 @@
 # xscreensaver-tumblrtv
 
 ```
-gcc -o tumblrtv tumblrtv.c -L/usr/lib -I/usr/include/gtk-3.0 -I/usr/include/glib-2.0 -lX11 -lgtk
+$ make
 ```
 
 http://www.dis.uniroma1.it/~liberato/screensaver/install.html
