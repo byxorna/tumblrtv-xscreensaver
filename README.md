@@ -17,6 +17,11 @@ programs:                     \
 
 Then run `xscreensaver-demo` and select your ish.
 
+# TODO
+
+[ ] how does no internet work? Can we render a different widget if it doesnt have connection?
+[ ] zoom browser if too small
+
 # Deprecated
 
 http://www.dis.uniroma1.it/~liberato/screensaver/install.html

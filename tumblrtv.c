@@ -68,10 +68,8 @@ int main(int argc, char* argv[])
     g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindow), NULL);
     g_signal_connect(main_window, "delete-event", G_CALLBACK(destroyWindow), NULL);
 
-    // color gdk window blaaaaack
-    //TODO this doesnt work
-    GdkColor blaaack = {0, 0x0000, 0x0000, 0x0000};
-    gtk_widget_modify_bg(GTK_WINDOW(webView), GTK_STATE_NORMAL, &blaaack);
+    // transparent background so we dont have any white flashes
+    webkit_web_view_set_transparent(webView, true);
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
@@ -89,23 +87,3 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-
-/*
-
-//TODO: when this callback is hooked up, closing the window gives:
-//(WebKitWebProcess:7873): Gdk-ERROR **: The program 'WebKitWebProcess' received an X Window System error.
-//This probably reflects a bug in the program.
-//The error was 'BadDrawable (invalid Pixmap or Window parameter)'.
-//  (Details: serial 285 error_code 9 request_code 14 (core protocol) minor_code 0)
-//  (Note to programmers: normally, X errors are reported asynchronously;
-//   that is, you will receive the error a while after causing it.
-//   To debug your program, run it with the GDK_SYNCHRONIZE environment
-//   variable to change this behavior. You can then get a meaningful
-//   backtrace from your debugger if you break on the gdk_x_error() function.)
-
-static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window)
-{
-    gtk_widget_destroy(window);
-    return TRUE;
-}
-*/
