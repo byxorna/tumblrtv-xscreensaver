@@ -21,6 +21,9 @@ Then run `xscreensaver-demo` and select your ish.
 
 [ ] how does no internet work? Can we render a different widget if it doesnt have connection?
 [ ] zoom browser if too small
+[ ] load tags and users from config file
+[ ] multi monitor support?
+[ ] package this up for lots of distros
 
 # Deprecated
 
