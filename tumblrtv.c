@@ -85,7 +85,8 @@ int main(int argc, char* argv[])
         char tags[100][100]; 
         FILE* tags_file = fopen(tags_path, "r");
         if (tags_file == NULL) {
-            printf("File didn't open...\n");
+            printf("File didn't open... defaulting to trippy\n");
+            sprintf(url, url_format, "trippy");
             goto post_tags;
         }
         int i = 0;
