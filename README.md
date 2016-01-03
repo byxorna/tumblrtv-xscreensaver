@@ -1,8 +1,23 @@
 # xscreensaver-tumblrtv
 
+Build the thing:
 ```
 $ make
 ```
+
+Add a config to xscreensaver to make your screensaver work: (point this to your binary) in ~/.xscreensaver
+```
+...
+programs:                     \
+                        \
+                                  /home/gconradi/code/xscreensaver-tumblrtv/tumblrtv \n\ 
+...
+
+```
+
+Then run `xscreensaver-demo` and select your ish.
+
+# Deprecated
 
 http://www.dis.uniroma1.it/~liberato/screensaver/install.html
 
