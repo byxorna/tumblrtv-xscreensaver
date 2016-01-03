@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
     // Initialize GTK+
     gtk_init(&argc, &argv);
 
+/*
 		//Open the display
     printf("Getting x11 display\n");
     Display *display = XOpenDisplay(NULL);
@@ -26,9 +27,7 @@ int main(int argc, char* argv[])
       printf("display is null. what in the fuck\n");
       exit(1);
     }
-    //display->create_resource_object("window", xid);
-    //Window gdk_x11_window_get_xid (GdkWindow *window);
-
+    */
 
     printf("Getting gdk screen?\n");
     GdkDisplay *gdkscreen = gdk_screen_get_default ();
@@ -44,20 +43,29 @@ int main(int argc, char* argv[])
       exit(1);
     }
 
-    printf("fuck\n");
     gint width;
     gint height;
     gdk_window_get_geometry(gdk_window, NULL, NULL, &width, &height);
-    printf("Got window width height %d %d\n", width, height);
+    printf("Got GDK window width height %d %d\n", width, height);
 
+    GdkRGBA bg = {
+      .red = 1.0,
+      .blue = 1.0,
+      .green = 0.0,
+      .alpha = 1.0
+    };
+    printf("Setting gdk window background\n");
+    gdk_window_set_background_rgba(gdk_window, &bg);
+    /*
     //Create the window
-    printf("Getting window\n");
+    printf("Getting X window\n");
     //Window w = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, 200, 100, 20, black, 10201020);
     Window w = DefaultRootWindow(display);
     //Window w = gdk_x11_get_default_root_xwindow();
     printf("seting background\n");
     //TODO(this isnt working)
 		XSetWindowBackground(display, w, 254);
+    */
 
 
     printf("creating gtk stuff for browser\n");
