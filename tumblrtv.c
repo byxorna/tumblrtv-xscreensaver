@@ -30,24 +30,37 @@ int main(int argc, char* argv[])
     //Window gdk_x11_window_get_xid (GdkWindow *window);
 
 
-
-    printf("Getting gdk display\n");
-    GdkDisplay *gdk_display = gdk_x11_lookup_xdisplay(display);
-    if (gdk_display == NULL){
-      printf("gdk_display is null. what in the fuck\n");
+    printf("Getting gdk screen?\n");
+    GdkDisplay *gdkscreen = gdk_screen_get_default ();
+    if (gdkscreen == NULL){
+      printf("gdkscreen is null. what in the fuck\n");
       exit(1);
     }
-    //int screen = DefaultScreen(display);
 
+    printf("Getting gdk root window from screen\n");
+    GdkWindow *gdk_window = gdk_screen_get_root_window (gdkscreen);
+    if (gdk_window == NULL){
+      printf("gdkwindow is null. what in the fuck\n");
+      exit(1);
+    }
+
+    printf("fuck\n");
+    gint width;
+    gint height;
+    gdk_window_get_geometry(gdk_window, NULL, NULL, &width, &height);
+    printf("Got window width height %d %d\n", width, height);
 
     //Create the window
     printf("Getting window\n");
     //Window w = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, 200, 100, 20, black, 10201020);
     Window w = DefaultRootWindow(display);
     //Window w = gdk_x11_get_default_root_xwindow();
-		XSetWindowBackground(display, w, 0);
+    printf("seting background\n");
+    //TODO(this isnt working)
+		XSetWindowBackground(display, w, 254);
 
 
+    printf("creating gtk stuff for browser\n");
     // Create an 800x600 window that will contain the browser instance
     GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(main_window), 800, 600);
@@ -68,11 +81,13 @@ int main(int argc, char* argv[])
 		// set the window for the GTKWindow to the X11 Root window
 		//GdkDisplay* gdk_display = gdk_x11_lookup_xdisplay(display);
 		//GdkDisplay* gdk_display = GDK_DISPLAY_XDISPLAY(display);
+    /*
 		if (gdk_display == NULL){
 			printf("gdk_display is null! Shit!\n");
 			exit(1);
     }
 		GdkWindow* gdk_window = gdk_x11_window_foreign_new_for_display(gdk_display, w);
+    */
 		//gtk_widget_set_parent_window(main_window, gdk_window_foreign_new((guint32)w));
 		gtk_widget_set_parent_window(main_window, gdk_window);
 
