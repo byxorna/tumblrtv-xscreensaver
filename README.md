@@ -24,6 +24,7 @@ Then run `xscreensaver-demo` and select your ish.
 [ ] load tags and users from config file
 [ ] multi monitor support?
 [ ] package this up for lots of distros
+[ ] turn off chatter from webkit stdout
 
 # Deprecated
 

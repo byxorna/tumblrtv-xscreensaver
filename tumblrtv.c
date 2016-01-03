@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
     gtk_init(&argc, &argv);
 
     GtkWidget *main_window = getWindow();
+    GdkWindow *gdk_window = gtk_widget_get_window(main_window);
 
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -70,6 +71,15 @@ int main(int argc, char* argv[])
 
     // transparent background so we dont have any white flashes
     webkit_web_view_set_transparent(webView, true);
+
+    int height;
+    int width;
+    gdk_window_get_geometry(gdk_window, NULL, NULL, &width, &height, NULL);
+    if (height < 480 && width < 640) {
+      // make the tiny preview windows look reasonable
+      webkit_web_view_set_full_content_zoom(webView, true);
+      webkit_web_view_set_zoom_level(webView, 0.4);
+    }
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
