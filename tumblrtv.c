@@ -1,10 +1,9 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
-#include <X11/Xlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <webkit2/webkit2.h>
+#include <webkit/webkit.h>
 
 
 char* url = "https://www.tumblr.com/tv/@computersarerad";
@@ -14,64 +13,49 @@ static void destroyWindow(GtkWidget *widget, GtkWidget* data ) {
   gtk_main_quit ();
 }
 
-int main(int argc, char* argv[])
-{
-    // Initialize GTK+
-    gtk_init(&argc, &argv);
+static GtkWidget* getWindow(){
+  GtkWidget *main_window;
+  const char* xwindow_s = getenv("XSCREENSAVER_WINDOW");
+  printf("XSCREENSAVER_WINDOW :%s\n",(xwindow_s!=NULL)? xwindow_s : "getenv returned NULL");
 
-/*
-		//Open the display
-    printf("Getting x11 display\n");
-    Display *display = XOpenDisplay(NULL);
-    if (display == NULL){
-      printf("display is null. what in the fuck\n");
-      exit(1);
-    }
-    */
-
-    printf("Getting gdk screen?\n");
-    GdkDisplay *gdkscreen = gdk_screen_get_default ();
-    if (gdkscreen == NULL){
-      printf("gdkscreen is null. what in the fuck\n");
-      exit(1);
-    }
-
-    printf("Getting gdk root window from screen\n");
-    GdkWindow *gdk_window = gdk_screen_get_root_window (gdkscreen);
-    if (gdk_window == NULL){
-      printf("gdkwindow is null. what in the fuck\n");
-      exit(1);
-    }
-
+  if (xwindow_s != NULL) {
+    // parse out the 
+    int xid = atoi(xwindow_s);
+    // if we are running in xscreensaver mode, use the provided window XID
+    main_window = gtk_window_new(GTK_WINDOW_POPUP);
+    GdkWindow *gdk_win = gdk_window_foreign_new(xid);
+    gtk_widget_show_all(main_window);
+    // reparent window of main_window to gdk_win
+    //      win.get_window().reparent(self.gdk_win, 0, 0)
+    //gtk_widget_reparent(self.gdk_win, 0, 0)
+    gtk_widget_set_parent_window(main_window, gdk_win);
     gint width;
     gint height;
-    gdk_window_get_geometry(gdk_window, NULL, NULL, &width, &height);
-    printf("Got GDK window width height %d %d\n", width, height);
-
-    GdkRGBA bg = {
-      .red = 1.0,
-      .blue = 1.0,
-      .green = 0.0,
-      .alpha = 1.0
-    };
-    printf("Setting gdk window background\n");
-    gdk_window_set_background_rgba(gdk_window, &bg);
-    /*
-    //Create the window
-    printf("Getting X window\n");
-    //Window w = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, 200, 100, 20, black, 10201020);
-    Window w = DefaultRootWindow(display);
-    //Window w = gdk_x11_get_default_root_xwindow();
-    printf("seting background\n");
-    //TODO(this isnt working)
-		XSetWindowBackground(display, w, 254);
-    */
-
+    gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height, NULL);
+    printf("Got height of gdk window: %dx%d\n",width,height);
+    // Make us cover our parent window
+    gtk_window_move(main_window, 0, 0);
+    gtk_window_set_default_size(main_window, width, height);
+    gtk_widget_set_size_request(main_window, width, height);
+  } else {
+    // otherwise just get a normal window
 
     printf("creating gtk stuff for browser\n");
     // Create an 800x600 window that will contain the browser instance
-    GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(main_window), 800, 600);
+  }
+  return main_window;
+}
+
+int main(int argc, char* argv[])
+{
+    int isWindowed = 1;
+
+    // Initialize GTK+
+    gtk_init(&argc, &argv);
+
+    GtkWidget *main_window = getWindow();
 
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -82,22 +66,9 @@ int main(int argc, char* argv[])
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
     g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindow), NULL);
-    //g_signal_connect(main_window, "destroy", G_CALLBACK(print), NULL);
+    g_signal_connect(main_window, "delete-event", G_CALLBACK(destroyWindow), NULL);
 		//TODO is this necessary
     //g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), main_window);
-
-		// set the window for the GTKWindow to the X11 Root window
-		//GdkDisplay* gdk_display = gdk_x11_lookup_xdisplay(display);
-		//GdkDisplay* gdk_display = GDK_DISPLAY_XDISPLAY(display);
-    /*
-		if (gdk_display == NULL){
-			printf("gdk_display is null! Shit!\n");
-			exit(1);
-    }
-		GdkWindow* gdk_window = gdk_x11_window_foreign_new_for_display(gdk_display, w);
-    */
-		//gtk_widget_set_parent_window(main_window, gdk_window_foreign_new((guint32)w));
-		gtk_widget_set_parent_window(main_window, gdk_window);
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
