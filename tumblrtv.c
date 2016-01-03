@@ -15,20 +15,22 @@ static void destroyWindow(GtkWidget *widget, GtkWidget* data ) {
 
 static GtkWidget* getWindow(){
   GtkWidget *main_window;
-  const char* xwindow_s = getenv("XSCREENSAVER_WINDOW");
-  printf("XSCREENSAVER_WINDOW :%s\n",(xwindow_s!=NULL)? xwindow_s : "getenv returned NULL");
+  char* xwindow_s = getenv("XSCREENSAVER_WINDOW");
 
   if (xwindow_s != NULL) {
-    // parse out the 
-    int xid = atoi(xwindow_s);
+    // parse out the xid from xscreensaver's env var, which is given as
+    // hex like 0x12023
+    int xid = (int)strtol(xwindow_s, NULL, 0);
+
     // if we are running in xscreensaver mode, use the provided window XID
     main_window = gtk_window_new(GTK_WINDOW_POPUP);
     GdkWindow *gdk_win = gdk_window_foreign_new(xid);
     gtk_widget_show_all(main_window);
     // reparent window of main_window to gdk_win
     //      win.get_window().reparent(self.gdk_win, 0, 0)
-    //gtk_widget_reparent(self.gdk_win, 0, 0)
-    gtk_widget_set_parent_window(main_window, gdk_win);
+    //gtk_widget_reparent(gdk_win, 0, 0)
+    //gtk_widget_set_parent_window(main_window, gdk_win);
+    gdk_window_reparent(gtk_widget_get_window(main_window), gdk_win, 0, 0);
     gint width;
     gint height;
     gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height, NULL);
@@ -50,8 +52,6 @@ static GtkWidget* getWindow(){
 
 int main(int argc, char* argv[])
 {
-    int isWindowed = 1;
-
     // Initialize GTK+
     gtk_init(&argc, &argv);
 
@@ -67,8 +67,11 @@ int main(int argc, char* argv[])
     // closed, the program will exit
     g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindow), NULL);
     g_signal_connect(main_window, "delete-event", G_CALLBACK(destroyWindow), NULL);
-		//TODO is this necessary
-    //g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), main_window);
+
+    // color gdk window blaaaaack
+    //TODO this doesnt work
+    GdkColor blaaack = {0, 0x0000, 0x0000, 0x0000};
+    gtk_widget_modify_bg(GTK_WINDOW(webView), GTK_STATE_NORMAL, &blaaack);
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
