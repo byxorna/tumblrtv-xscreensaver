@@ -1,52 +1,19 @@
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <webkit2/webkit2.h>
+
+/*
+This will render Tumblr TV in a GTK window
+*/
 
 
 char* url = "https://www.tumblr.com/tv/@computersarerad";
+static void destroyWindowCb(GtkWidget* widget, GtkWidget* window);
 //static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
-
-static void destroyWindow(GtkWidget *widget, GtkWidget* data ) {
-  gtk_main_quit ();
-}
 
 int main(int argc, char* argv[])
 {
     // Initialize GTK+
     gtk_init(&argc, &argv);
-
-		//Open the display
-    printf("Getting x11 display\n");
-    Display *display = XOpenDisplay(NULL);
-    if (display == NULL){
-      printf("display is null. what in the fuck\n");
-      exit(1);
-    }
-    //display->create_resource_object("window", xid);
-    //Window gdk_x11_window_get_xid (GdkWindow *window);
-
-
-
-    printf("Getting gdk display\n");
-    GdkDisplay *gdk_display = gdk_x11_lookup_xdisplay(display);
-    if (gdk_display == NULL){
-      printf("gdk_display is null. what in the fuck\n");
-      exit(1);
-    }
-    //int screen = DefaultScreen(display);
-
-
-    //Create the window
-    printf("Getting window\n");
-    //Window w = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, 200, 100, 20, black, 10201020);
-    Window w = DefaultRootWindow(display);
-    //Window w = gdk_x11_get_default_root_xwindow();
-		XSetWindowBackground(display, w, 0);
-
 
     // Create an 800x600 window that will contain the browser instance
     GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -60,21 +27,9 @@ int main(int argc, char* argv[])
 
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
-    g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindow), NULL);
-    //g_signal_connect(main_window, "destroy", G_CALLBACK(print), NULL);
+    g_signal_connect(main_window, "destroy", G_CALLBACK(destroyWindowCb), NULL);
 		//TODO is this necessary
     //g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), main_window);
-
-		// set the window for the GTKWindow to the X11 Root window
-		//GdkDisplay* gdk_display = gdk_x11_lookup_xdisplay(display);
-		//GdkDisplay* gdk_display = GDK_DISPLAY_XDISPLAY(display);
-		if (gdk_display == NULL){
-			printf("gdk_display is null! Shit!\n");
-			exit(1);
-    }
-		GdkWindow* gdk_window = gdk_x11_window_foreign_new_for_display(gdk_display, w);
-		//gtk_widget_set_parent_window(main_window, gdk_window_foreign_new((guint32)w));
-		gtk_widget_set_parent_window(main_window, gdk_window);
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
@@ -93,6 +48,10 @@ int main(int argc, char* argv[])
 }
 
 
+static void destroyWindowCb(GtkWidget* widget, GtkWidget* window)
+{
+    gtk_main_quit();
+}
 /*
 
 //TODO: when this callback is hooked up, closing the window gives:
