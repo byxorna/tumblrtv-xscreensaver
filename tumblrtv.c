@@ -34,16 +34,12 @@ static GtkWidget* getWindow(){
     gint width;
     gint height;
     gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height, NULL);
-    printf("Got height of gdk window: %dx%d\n",width,height);
     // Make us cover our parent window
     gtk_window_move(main_window, 0, 0);
     gtk_window_set_default_size(main_window, width, height);
     gtk_widget_set_size_request(main_window, width, height);
   } else {
     // otherwise just get a normal window
-
-    printf("creating gtk stuff for browser\n");
-    // Create an 800x600 window that will contain the browser instance
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(main_window), 800, 600);
   }
@@ -72,14 +68,22 @@ int main(int argc, char* argv[])
     // transparent background so we dont have any white flashes
     webkit_web_view_set_transparent(webView, true);
 
+    /*
     int height;
     int width;
     gdk_window_get_geometry(gdk_window, NULL, NULL, &width, &height, NULL);
+    //TODO: this isnt working correctly; its detecting xscreensaver running as
+    // a gdkwindow of 200x200, so it scales things
     if (height < 480 && width < 640) {
       // make the tiny preview windows look reasonable
       webkit_web_view_set_full_content_zoom(webView, true);
       webkit_web_view_set_zoom_level(webView, 0.4);
     }
+    */
+
+    // set up some webkit settings
+    WebKitWebSettings *settings = webkit_web_view_get_settings(webView);
+    g_object_set (G_OBJECT(settings), "enable-webgl", true, NULL);
 
     // Load a web page into the browser instance
     webkit_web_view_load_uri(webView, url);
@@ -92,6 +96,7 @@ int main(int argc, char* argv[])
     gtk_widget_show_all(main_window);
 
     // Run the main GTK+ event loop
+    gdk_threads_init();
     gtk_main();
 
     return 0;
