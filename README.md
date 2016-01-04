@@ -26,23 +26,18 @@ Then run `xscreensaver-demo` and select your ish.
 [ ] package this up for lots of distros
 [ ] turn off chatter from webkit stdout
 
-# Deprecated
+# License
 
-http://www.dis.uniroma1.it/~liberato/screensaver/install.html
+Copyright 2016 Gabe Conradi
 
-We consider as an example the module simplesquares.c. The steps needed to make it run are:
-.) Compile the module. If it only uses Xlib functions (like the modules in this tutorial), this is:
-```
-gcc -o simplesquares simplesquares.c -L/usr/lib -lX11
-```
-.)In general, the directory to use in -Ldirectory is the one containing libX11.so, and can be found by:
-```
-find /usr -name libX11.so
-```
-.)The module can be tested by simply running it. The output goes in the root window, which is often visible as the "the background of the screen". Some window managers hide the root window with another window: in this case, the module can be tested by installing it as a screensaver module (see below)
-.) Make sure that the executable is your path.
-.) Add the module to the xscreensaver configuration file. This is done by creating a file .xscreensaver in your home directory. For a single module, this contains a line like:
-```
-programs: simplesquares
-```
-.) To test the module, use xscreensaver-demo (use the "preview" button)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
