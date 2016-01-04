@@ -1,36 +1,53 @@
 # xscreensaver-tumblrtv
 
-Build the thing:
-```
-$ make
-```
 
-Add a config to xscreensaver to make your screensaver work: (point this to your binary) in ~/.xscreensaver
-```
-...
-programs:                     \
-                        \
-                                  /home/gconradi/code/xscreensaver-tumblrtv/tumblrtv \n\ 
-...
-
-```
-
-Then run `xscreensaver-demo` and select your ish.
 
 # TODO
 
-[ ] how does no internet work? Can we render a different widget if it doesnt have connection?
-[x] zoom browser if too small
-[x] load tags and users from config file
+[ ] how does no internet work? (very poorly!) Can we render a different widget if it doesnt have connection?
 [ ] multi monitor support?
 [ ] package this up for lots of distros
 [ ] turn off chatter from webkit stdout
 [ ] Document the file to edit which tags show up in postinstall
 [ ] Document how to configure xscreensaver for this screenie
+[x] zoom browser if too small
+[x] load tags and users from config file
 
 # Install
 
-There is an AUR build available: https://aur.archlinux.org/packages/tumblrtv-xscreensaver/
+There is an AUR build available if you are on Arch: https://aur.archlinux.org/packages/tumblrtv-xscreensaver/
+
+Build the thing:
+```
+$ make
+$ sudo make install
+```
+
+The install drops the `tumblrtv` binary into `/usr/lib/xscreensaver`.
+
+# Configure
+
+Run `xscreensaver-demo`, and it will generate a `~/.xscreensaver` config for you if you didnt have one before. Now, add a config to xscreensaver to make your screensaver work: (point this to your binary) in ~/.xscreensaver.
+
+```
+...
+programs:                     \
+    tumblrtv \n\
+...
+
+```
+
+Then run `xscreensaver-demo` and select `tumblrtv`.
+
+
+`tumblrtv` uses a config file in `~/.config/tumblrtv-xscreensaver/tags`, which is newline delimited tags to display. A random tag will be chosen from the file each time the screensaver launches. By default, it will pick from a set of tags.
+
+Example `~/.config/tumblrtv-xscreensaver/tags`:
+```
+@computersarerad
+lsd
+cyberpunk
+```
 
 # License
 
