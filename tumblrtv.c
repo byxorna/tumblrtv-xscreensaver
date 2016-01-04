@@ -18,13 +18,22 @@ const char* DEFAULT_TAGS[] = {
   "trippy"
 };
 
-static void _load_callback(GtkWidget* widget, GParamSpec *pspec, gpointer user_data){
-  // get "load-status" property
-  // WEBKIT_LOAD_FINISHED or WEBKIT_LOAD_FAILED
-  //TODO
-
-  // Make sure the main window and all its contents are visible
-  gtk_widget_show_all(webview);
+static void _load_callback(GtkWidget* webview, GParamSpec *pspec, gpointer user_data){
+  //TODO is GParamSpec holding the actual value?
+  WebKitLoadStatus s = webkit_web_view_get_load_status(webview);
+  if (s == WEBKIT_LOAD_FINISHED){
+    printf("Load succeeded! Showing webview\n");
+    // Make sure the webview contents are visible
+    gtk_widget_show(webview);
+  } else if (s == WEBKIT_LOAD_FAILED){
+    printf("Load failed! Hiding webview for a bit\n");
+    gtk_widget_hide(webview);
+    //TODO schedule a refresh for a while from now
+    sleep(10);
+    webkit_web_view_reload(webview);
+  } else {
+    printf("Got callback for idk what: %d\n", s);
+  }
 }
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
@@ -45,7 +54,6 @@ static void createDrawContext(GtkWidget** widget, GdkWindow** window){
     main_window = gtk_window_new(GTK_WINDOW_POPUP);
     //main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gdk_win = gdk_window_foreign_new(xid);
-    gtk_widget_show_all(main_window);
     // reparent window of main_window to gdk_win
     gdk_window_reparent(gtk_widget_get_window(main_window), gdk_win, 0, 0);
     gint width;
@@ -81,6 +89,10 @@ int main(int argc, char* argv[])
 
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
+
+    //hide the webview; we will handle showing it when we get the WEBKIT_LOAD_FINISHED notify
+    gtk_widget_hide(webView);
+    gtk_widget_show(main_window);
 
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
@@ -152,9 +164,6 @@ int main(int argc, char* argv[])
     //g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(), NULL);
     g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(_load_callback), NULL);
 
-    // Make sure the main window and all its contents are visible
-    gtk_widget_show_all(main_window);
-}
     // Run the main GTK+ event loop
     gtk_main();
 
