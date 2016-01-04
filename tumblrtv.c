@@ -11,10 +11,11 @@ const int MAX_TAG_LENGTH = 100;
 const int MAX_NUMBER_TAGS = 100;
 const int MAX_URL_LENGTH = 200;
 const char* URL_FORMAT = "https://www.tumblr.com/tv/%s";
-const char* CONFIG_PATH = "~/.config/xscreensaver-tumblrtv/tags";
+const char* CONFIG_PATH = "~/.config/tumblrtv-xscreensaver/tags";
 const char* DEFAULT_TAGS[] = {
-  "trippy",
-  "dizzy"
+  "bill nye",
+  "@computersarerad",
+  "trippy"
 };
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
