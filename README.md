@@ -49,6 +49,7 @@ cyberpunk
 * [ ] multi monitor support?
 * [ ] package this up for lots of distros
 * [ ] turn off chatter from webkit stdout
+* [ ] gif rendering looks pixelated. Is there a smoothing option?
 * [ ] Document the file to edit which tags show up in postinstall
 * [ ] Document how to configure xscreensaver for this screenie
 * [x] zoom browser if too small
