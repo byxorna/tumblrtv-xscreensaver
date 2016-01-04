@@ -92,6 +92,8 @@ int main(int argc, char* argv[])
     // set up some webkit settings
     WebKitWebSettings *settings = webkit_web_view_get_settings(webView);
     g_object_set (G_OBJECT(settings), "enable-webgl", true, NULL);
+    // accelerated-compositing chokes on my machine, but maybe its my shitty nvidia drivers
+    g_object_set (G_OBJECT(settings), "enable-accelerated-compositing", false, NULL);
 
     // select tag and format url
     wordexp_t exp_result;
