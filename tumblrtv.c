@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <wordexp.h>
 #include <webkit/webkit.h>
 
 
-char* url = "https://www.tumblr.com/tv/@computersarerad";
+char* url_format = "https://www.tumblr.com/tv/%s";
 //static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
@@ -84,7 +86,40 @@ int main(int argc, char* argv[])
     WebKitWebSettings *settings = webkit_web_view_get_settings(webView);
     g_object_set (G_OBJECT(settings), "enable-webgl", true, NULL);
 
-    // Load a web page into the browser instance
+    // select tag and format url
+    wordexp_t exp_result;
+    wordexp("~/.tags", &exp_result, 0);
+    printf("Loading tags file at %s\n", exp_result.we_wordv[0]);
+    char* tags_path = exp_result.we_wordv[0];
+    char url[1000];
+    if (tags_path == NULL) {
+        printf("No tag file found. defaulting to trippy\n");
+        sprintf(url, url_format, "trippy");
+    } else {
+        char tags[100][100]; 
+        FILE* tags_file = fopen(tags_path, "r");
+        if (tags_file == NULL) {
+            printf("File didn't open... defaulting to trippy\n");
+            sprintf(url, url_format, "trippy");
+            goto post_tags;
+        }
+        int i = 0;
+        printf("Iterating through file\n");
+        while (i < 100 && fgets(tags[i], sizeof(tags[0]), tags_file)) {
+            tags[i][strlen(tags[i]) - 1] = '\0';
+            printf("Got %s!\n", tags[i]);
+            ++i;
+        }
+        printf("%d tags found. selecting one.\n", i);
+        srand(time(0));
+        int index = rand() % i;
+        printf("%d is our index...\n", index);
+        printf("%s selected!\n", tags[index]); 
+        sprintf(url, url_format, tags[index]);
+    }
+post_tags:
+    printf("URL is %s\n", url);
+
     webkit_web_view_load_uri(webView, url);
 
     // Make sure that when the browser area becomes visible, it will get mouse
