@@ -30,5 +30,7 @@ clean:
 
 install:
 	mkdir -p $(DESTDIR)/usr/lib/xscreensaver/
+	mkdir -p $(DESTDIR)/usr/share/applications/screensavers/
 	cp $(EXECUTABLE) $(DESTDIR)/usr/lib/xscreensaver/
+	cp tumblrtv.desktop $(DESTDIR)/usr/share/applications/screensavers/
 

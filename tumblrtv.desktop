@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=TumblrTV
+Comment=Tumblr TV xscreensaver
+TryExec=tumblrtv
+Exec=tumblrtv
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Screensaver
