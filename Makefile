@@ -12,14 +12,10 @@ EXECUTABLE = tumblrtv
 
 CFLAGS += `pkg-config --cflags gdk-2.0`
 CFLAGS += `pkg-config --cflags gtk+-2.0`
-#CFLAGS += `pkg-config --cflags atk`
 CFLAGS += `pkg-config --cflags webkit-1.0`
-#LDFLAGS += `pkg-config --libs x11`
 LDFLAGS += `pkg-config --libs gdk-2.0`
 LDFLAGS += `pkg-config --libs gtk+-2.0`
-#LDFLAGS += `pkg-config --libs atk`
 LDFLAGS += `pkg-config --libs webkit-1.0`
-#LDFLAGS += `pkg-config --libs glib-2.0`
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -31,3 +27,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
+
+install:
+	cp $(EXECUTABLE) $(DESTDIR)/usr/lib/xscreensaver/
+
