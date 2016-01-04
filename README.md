@@ -21,10 +21,16 @@ Then run `xscreensaver-demo` and select your ish.
 
 [ ] how does no internet work? Can we render a different widget if it doesnt have connection?
 [x] zoom browser if too small
-[ ] load tags and users from config file
+[x] load tags and users from config file
 [ ] multi monitor support?
 [ ] package this up for lots of distros
 [ ] turn off chatter from webkit stdout
+[ ] Document the file to edit which tags show up in postinstall
+[ ] Document how to configure xscreensaver for this screenie
+
+# Install
+
+There is an AUR build available: https://aur.archlinux.org/packages/tumblrtv-xscreensaver/
 
 # License
 
