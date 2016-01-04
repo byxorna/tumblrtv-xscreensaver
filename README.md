@@ -1,21 +1,15 @@
 # xscreensaver-tumblrtv
 
+xscreensaver to display Tumblr TV (https://tumblr.com/tv/trippy)
 
-
-# TODO
-
-[ ] how does no internet work? (very poorly!) Can we render a different widget if it doesnt have connection?
-[ ] multi monitor support?
-[ ] package this up for lots of distros
-[ ] turn off chatter from webkit stdout
-[ ] Document the file to edit which tags show up in postinstall
-[ ] Document how to configure xscreensaver for this screenie
-[x] zoom browser if too small
-[x] load tags and users from config file
-
-# Install
+# Build and Install
 
 There is an AUR build available if you are on Arch: https://aur.archlinux.org/packages/tumblrtv-xscreensaver/
+
+You will need:
+* webkitgtk2 (provides webkitgtk-1.0)
+* gtk2
+* xscreensaver
 
 Build the thing:
 ```
@@ -23,7 +17,7 @@ $ make
 $ sudo make install
 ```
 
-The install drops the `tumblrtv` binary into `/usr/lib/xscreensaver`.
+The install drops the `tumblrtv` binary into `/usr/lib/xscreensaver`. Alternatively, you can run the `./tumblrtv` binary standalone.
 
 # Configure
 
@@ -48,6 +42,17 @@ Example `~/.config/tumblrtv-xscreensaver/tags`:
 lsd
 cyberpunk
 ```
+
+# TODO
+
+* [ ] how does no internet work? (very poorly!) Can we render a different widget if it doesnt have connection?
+* [ ] multi monitor support?
+* [ ] package this up for lots of distros
+* [ ] turn off chatter from webkit stdout
+* [ ] Document the file to edit which tags show up in postinstall
+* [ ] Document how to configure xscreensaver for this screenie
+* [x] zoom browser if too small
+* [x] load tags and users from config file
 
 # License
 
