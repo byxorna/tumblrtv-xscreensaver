@@ -18,6 +18,15 @@ const char* DEFAULT_TAGS[] = {
   "trippy"
 };
 
+static void _load_callback(GtkWidget* widget, GParamSpec *pspec, gpointer user_data){
+  // get "load-status" property
+  // WEBKIT_LOAD_FINISHED or WEBKIT_LOAD_FAILED
+  //TODO
+
+  // Make sure the main window and all its contents are visible
+  gtk_widget_show_all(webview);
+}
+
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
   gtk_main_quit ();
 }
@@ -61,6 +70,7 @@ int main(int argc, char* argv[])
 {
     // Initialize GTK+
     gtk_init(&argc, &argv);
+    gdk_threads_init();
 
     GtkWidget *main_window;
     GdkWindow *gdk_window;
@@ -137,12 +147,15 @@ int main(int argc, char* argv[])
     // Make sure that when the browser area becomes visible, it will get mouse
     // and keyboard events
     gtk_widget_grab_focus(GTK_WIDGET(webView));
+    //https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-connect
+    //g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(), NULL);
+    //g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(), NULL);
+    g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(_load_callback), NULL);
 
     // Make sure the main window and all its contents are visible
     gtk_widget_show_all(main_window);
-
+}
     // Run the main GTK+ event loop
-    gdk_threads_init();
     gtk_main();
 
     return 0;
