@@ -1,6 +1,6 @@
 # Set up basic variables:
 CC = gcc
-CFLAGS = -c -Wall
+CFLAGS = -c -Wall -std=c99
 LDFLAGS =
 
 # List of sources:

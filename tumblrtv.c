@@ -7,9 +7,15 @@
 #include <wordexp.h>
 #include <webkit/webkit.h>
 
-
-char* url_format = "https://www.tumblr.com/tv/%s";
-//static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
+const int MAX_TAG_LENGTH = 100;
+const int MAX_NUMBER_TAGS = 100;
+const int MAX_URL_LENGTH = 200;
+const char* URL_FORMAT = "https://www.tumblr.com/tv/%s";
+const char* CONFIG_PATH = "~/.config/xscreensaver-tumblrtv/tags";
+const char* DEFAULT_TAGS[] = {
+  "trippy",
+  "dizzy"
+};
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
   gtk_main_quit ();
@@ -88,36 +94,39 @@ int main(int argc, char* argv[])
 
     // select tag and format url
     wordexp_t exp_result;
-    wordexp("~/.tags", &exp_result, 0);
+    wordexp(CONFIG_PATH, &exp_result, 0);
     printf("Loading tags file at %s\n", exp_result.we_wordv[0]);
     char* tags_path = exp_result.we_wordv[0];
-    char url[1000];
-    if (tags_path == NULL) {
-        printf("No tag file found. defaulting to trippy\n");
-        sprintf(url, url_format, "trippy");
-    } else {
-        char tags[100][100]; 
-        FILE* tags_file = fopen(tags_path, "r");
-        if (tags_file == NULL) {
-            printf("File didn't open... defaulting to trippy\n");
-            sprintf(url, url_format, "trippy");
-            goto post_tags;
+    char url[MAX_URL_LENGTH];
+    char tags[MAX_NUMBER_TAGS][MAX_TAG_LENGTH];
+    int  tags_length = 0;
+
+    FILE* tags_file;
+    if (tags_path == NULL || (tags_file = fopen(tags_path, "r")) == NULL) {
+        printf("No tag file found. using defaults\n");
+        int default_tags_length = sizeof(DEFAULT_TAGS) / sizeof(char*);
+        for (int i = 0; i < default_tags_length; ++i) {
+            printf("%d\n", i);
+            strcpy(tags[i], DEFAULT_TAGS[i]);
         }
+        tags_length = default_tags_length;
+    } else {
         int i = 0;
         printf("Iterating through file\n");
-        while (i < 100 && fgets(tags[i], sizeof(tags[0]), tags_file)) {
+        while (i < MAX_NUMBER_TAGS && fgets(tags[i], sizeof(tags[0]), tags_file)) {
             tags[i][strlen(tags[i]) - 1] = '\0';
             printf("Got %s!\n", tags[i]);
             ++i;
         }
-        printf("%d tags found. selecting one.\n", i);
-        srand(time(0));
-        int index = rand() % i;
-        printf("%d is our index...\n", index);
-        printf("%s selected!\n", tags[index]); 
-        sprintf(url, url_format, tags[index]);
+        tags_length = i;
     }
-post_tags:
+
+    printf("%d tags found. selecting one.\n", tags_length);
+    srand(time(0));
+    int index = rand() % tags_length;
+    printf("%d is our index...\n", index);
+    printf("%s selected!\n", tags[index]); 
+    sprintf(url, URL_FORMAT, tags[index]);
     printf("URL is %s\n", url);
 
     webkit_web_view_load_uri(webView, url);
