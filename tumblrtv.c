@@ -21,26 +21,20 @@ const char* DEFAULT_TAGS[] = {
 static void load_status_cb(WebKitWebView* webview, GParamSpec *pspec, gpointer user_data){
   //TODO is GParamSpec holding the actual value?
   WebKitLoadStatus s = webkit_web_view_get_load_status(webview);
+  //printf("Load status: %d\n", s);
   if (s == WEBKIT_LOAD_FINISHED){
     printf("Loading Tumblr TV succeeded!\n");
-    // Make sure the webview contents are visible now that things are loaded
-    gtk_widget_show(GTK_WIDGET(webview));
   } else if (s == WEBKIT_LOAD_FAILED){
     printf("Load failed! Womp womp :(\n");
-    gtk_widget_hide(GTK_WIDGET(webview));
-    // schedule a refresh for a while from now
-    //TODO this blocks the main thread!!!! :(
-    sleep(10);
-    printf("requesting reload\n");
-    gtk_widget_show(GTK_WIDGET(webview));
-    //TODO should we request_uri instead? looks like we dont receive load-status events
-    // when loading from a load-failure page :(
-    webkit_web_view_go_back(webview);
-    webkit_web_view_reload(webview);
-    //webkit_web_view_reload_bypass_cache(webview);
-  } else {
-    printf("at least something is happening\n");
   }
+}
+static gboolean load_error_cb(WebKitWebView  *web_view, WebKitWebFrame *web_frame, gchar *uri, GError *web_error, gpointer user_data){
+  // return true to prevent the default error page from being rendered
+  int sdelay = 10;
+  printf("load error %s, reloading in %d seconds\n", uri, sdelay);
+  sleep(sdelay);
+  webkit_web_view_load_uri(web_view, uri);
+  return TRUE;
 }
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
@@ -103,8 +97,8 @@ int main(int argc, char* argv[])
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
 
     //hide the webview; we will handle showing it when we get the WEBKIT_LOAD_FINISHED notify
-    gtk_widget_hide(GTK_WIDGET(webView));
-    gtk_widget_show(main_window);
+    //gtk_widget_hide(GTK_WIDGET(webView));
+    gtk_widget_show_all(main_window);
 
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
@@ -173,6 +167,7 @@ int main(int argc, char* argv[])
     gtk_widget_grab_focus(GTK_WIDGET(webView));
     // hit our callback whenever load-status changes
     g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(load_status_cb), &url);
+    g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(load_error_cb), &url);
 
     // Run the main GTK+ event loop
     gtk_main();
