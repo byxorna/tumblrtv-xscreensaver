@@ -7,6 +7,7 @@
 #include <wordexp.h>
 #include <webkit/webkit.h>
 
+const int RELOAD_AFTER_FAILURE_INTERVAL = 2;  // seconds
 const int MAX_TAG_LENGTH = 100;
 const int MAX_NUMBER_TAGS = 100;
 const int MAX_URL_LENGTH = 200;
@@ -30,9 +31,8 @@ static void load_status_cb(WebKitWebView* webview, GParamSpec *pspec, gpointer u
 }
 static gboolean load_error_cb(WebKitWebView  *web_view, WebKitWebFrame *web_frame, gchar *uri, GError *web_error, gpointer user_data){
   // return true to prevent the default error page from being rendered
-  int sdelay = 10;
-  printf("load error %s, reloading in %d seconds\n", uri, sdelay);
-  sleep(sdelay);
+  printf("load error %s, reloading in %d seconds\n", uri, RELOAD_AFTER_FAILURE_INTERVAL);
+  sleep(RELOAD_AFTER_FAILURE_INTERVAL);
   webkit_web_view_load_uri(web_view, uri);
   return TRUE;
 }
@@ -55,6 +55,7 @@ static void createDrawContext(GtkWidget** widget, GdkWindow** window){
     main_window = gtk_window_new(GTK_WINDOW_POPUP);
     //main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gdk_win = gdk_window_foreign_new(xid);
+    gtk_widget_show_all(main_window);
     // reparent window of main_window to gdk_win
     gdk_window_reparent(gtk_widget_get_window(main_window), gdk_win, 0, 0);
     gint width;
@@ -95,9 +96,7 @@ int main(int argc, char* argv[])
 
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
-
-    //hide the webview; we will handle showing it when we get the WEBKIT_LOAD_FINISHED notify
-    //gtk_widget_hide(GTK_WIDGET(webView));
+    // necessary for ensuring positioning relative to xscreensaver-demo is right
     gtk_widget_show_all(main_window);
 
     // Set up callbacks so that if either the main window or the browser instance is
