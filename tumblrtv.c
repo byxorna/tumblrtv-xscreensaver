@@ -7,6 +7,7 @@
 #include <wordexp.h>
 #include <webkit/webkit.h>
 
+const int RELOAD_AFTER_FAILURE_INTERVAL = 2;  // seconds
 const int MAX_TAG_LENGTH = 100;
 const int MAX_NUMBER_TAGS = 100;
 const int MAX_URL_LENGTH = 200;
@@ -17,6 +18,24 @@ const char* DEFAULT_TAGS[] = {
   "@computersarerad",
   "trippy"
 };
+
+static void load_status_cb(WebKitWebView* webview, GParamSpec *pspec, gpointer user_data){
+  //TODO is GParamSpec holding the actual value?
+  WebKitLoadStatus s = webkit_web_view_get_load_status(webview);
+  //printf("Load status: %d\n", s);
+  if (s == WEBKIT_LOAD_FINISHED){
+    printf("Loading Tumblr TV succeeded!\n");
+  } else if (s == WEBKIT_LOAD_FAILED){
+    printf("Load failed! Womp womp :(\n");
+  }
+}
+static gboolean load_error_cb(WebKitWebView  *web_view, WebKitWebFrame *web_frame, gchar *uri, GError *web_error, gpointer user_data){
+  // return true to prevent the default error page from being rendered
+  printf("load error %s, reloading in %d seconds\n", uri, RELOAD_AFTER_FAILURE_INTERVAL);
+  sleep(RELOAD_AFTER_FAILURE_INTERVAL);
+  webkit_web_view_load_uri(web_view, uri);
+  return TRUE;
+}
 
 static void destroyWindow(GtkWidget* widget, GtkWidget* data ) {
   gtk_main_quit ();
@@ -44,8 +63,8 @@ static void createDrawContext(GtkWidget** widget, GdkWindow** window){
     gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height, NULL);
     printf("Looks like we are about %dx%d\n",width,height);
     // Make us cover our parent window
-    gtk_window_move(main_window, 0, 0);
-    gtk_window_set_default_size(main_window, width, height);
+    gtk_window_move(GTK_WINDOW(main_window), 0, 0);
+    gtk_window_set_default_size(GTK_WINDOW(main_window), width, height);
     gtk_widget_set_size_request(main_window, width, height);
   } else {
     // otherwise just get a normal window
@@ -61,6 +80,7 @@ int main(int argc, char* argv[])
 {
     // Initialize GTK+
     gtk_init(&argc, &argv);
+    gdk_threads_init();
 
     GtkWidget *main_window;
     GdkWindow *gdk_window;
@@ -69,8 +89,15 @@ int main(int argc, char* argv[])
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
+    // make sure the background of the main window is black plz
+    GdkColor blaaack;
+    gdk_color_parse("#000000", &blaaack);
+    gtk_widget_modify_bg(main_window, GTK_STATE_NORMAL, &blaaack);
+
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
+    // necessary for ensuring positioning relative to xscreensaver-demo is right
+    gtk_widget_show_all(main_window);
 
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
@@ -128,21 +155,20 @@ int main(int argc, char* argv[])
     srand(time(0));
     int index = rand() % tags_length;
     printf("%d is our index...\n", index);
-    printf("%s selected!\n", tags[index]); 
+    printf("%s selected!\n", tags[index]);
     sprintf(url, URL_FORMAT, tags[index]);
-    printf("URL is %s\n", url);
 
+    printf("Loading %s\n", url);
     webkit_web_view_load_uri(webView, url);
 
     // Make sure that when the browser area becomes visible, it will get mouse
     // and keyboard events
     gtk_widget_grab_focus(GTK_WIDGET(webView));
-
-    // Make sure the main window and all its contents are visible
-    gtk_widget_show_all(main_window);
+    // hit our callback whenever load-status changes
+    g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(load_status_cb), &url);
+    g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(load_error_cb), &url);
 
     // Run the main GTK+ event loop
-    gdk_threads_init();
     gtk_main();
 
     return 0;
