@@ -18,21 +18,28 @@ const char* DEFAULT_TAGS[] = {
   "trippy"
 };
 
-static void _load_callback(GtkWidget* webview, GParamSpec *pspec, gpointer user_data){
+static void load_status_cb(WebKitWebView* webview, GParamSpec *pspec, gpointer user_data){
   //TODO is GParamSpec holding the actual value?
   WebKitLoadStatus s = webkit_web_view_get_load_status(webview);
   if (s == WEBKIT_LOAD_FINISHED){
-    printf("Load succeeded! Showing webview\n");
-    // Make sure the webview contents are visible
-    gtk_widget_show(webview);
+    printf("Loading Tumblr TV succeeded!\n");
+    // Make sure the webview contents are visible now that things are loaded
+    gtk_widget_show(GTK_WIDGET(webview));
   } else if (s == WEBKIT_LOAD_FAILED){
-    printf("Load failed! Hiding webview for a bit\n");
-    gtk_widget_hide(webview);
-    //TODO schedule a refresh for a while from now
+    printf("Load failed! Womp womp :(\n");
+    gtk_widget_hide(GTK_WIDGET(webview));
+    // schedule a refresh for a while from now
+    //TODO this blocks the main thread!!!! :(
     sleep(10);
+    printf("requesting reload\n");
+    gtk_widget_show(GTK_WIDGET(webview));
+    //TODO should we request_uri instead? looks like we dont receive load-status events
+    // when loading from a load-failure page :(
+    webkit_web_view_go_back(webview);
     webkit_web_view_reload(webview);
+    //webkit_web_view_reload_bypass_cache(webview);
   } else {
-    printf("Got callback for idk what: %d\n", s);
+    printf("at least something is happening\n");
   }
 }
 
@@ -61,8 +68,8 @@ static void createDrawContext(GtkWidget** widget, GdkWindow** window){
     gdk_window_get_geometry(gdk_win, NULL, NULL, &width, &height, NULL);
     printf("Looks like we are about %dx%d\n",width,height);
     // Make us cover our parent window
-    gtk_window_move(main_window, 0, 0);
-    gtk_window_set_default_size(main_window, width, height);
+    gtk_window_move(GTK_WINDOW(main_window), 0, 0);
+    gtk_window_set_default_size(GTK_WINDOW(main_window), width, height);
     gtk_widget_set_size_request(main_window, width, height);
   } else {
     // otherwise just get a normal window
@@ -87,11 +94,16 @@ int main(int argc, char* argv[])
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
+    // make sure the background of the main window is black plz
+    GdkColor blaaack;
+    gdk_color_parse("#000000", &blaaack);
+    gtk_widget_modify_bg(main_window, GTK_STATE_NORMAL, &blaaack);
+
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(webView));
 
     //hide the webview; we will handle showing it when we get the WEBKIT_LOAD_FINISHED notify
-    gtk_widget_hide(webView);
+    gtk_widget_hide(GTK_WIDGET(webView));
     gtk_widget_show(main_window);
 
     // Set up callbacks so that if either the main window or the browser instance is
@@ -150,19 +162,17 @@ int main(int argc, char* argv[])
     srand(time(0));
     int index = rand() % tags_length;
     printf("%d is our index...\n", index);
-    printf("%s selected!\n", tags[index]); 
+    printf("%s selected!\n", tags[index]);
     sprintf(url, URL_FORMAT, tags[index]);
-    printf("URL is %s\n", url);
 
+    printf("Loading %s\n", url);
     webkit_web_view_load_uri(webView, url);
 
     // Make sure that when the browser area becomes visible, it will get mouse
     // and keyboard events
     gtk_widget_grab_focus(GTK_WIDGET(webView));
-    //https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-connect
-    //g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(), NULL);
-    //g_signal_connect(G_OBJECT(webView), "load-error", G_CALLBACK(), NULL);
-    g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(_load_callback), NULL);
+    // hit our callback whenever load-status changes
+    g_signal_connect(G_OBJECT(webView), "notify::load-status", G_CALLBACK(load_status_cb), &url);
 
     // Run the main GTK+ event loop
     gtk_main();
