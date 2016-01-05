@@ -45,13 +45,13 @@ cyberpunk
 
 # TODO
 
-* [ ] how does no internet work? (very poorly!) Can we render a different widget if it doesnt have connection?
 * [ ] multi monitor support?
 * [ ] package this up for lots of distros
 * [ ] turn off chatter from webkit stdout
 * [ ] gif rendering looks pixelated. Is there a smoothing option?
 * [ ] Document the file to edit which tags show up in postinstall
-* [ ] Document how to configure xscreensaver for this screenie
+* [x] Document how to configure xscreensaver for this screenie
+* [x] how does no internet work? (very poorly!) Can we render a different widget if it doesnt have connection?
 * [x] zoom browser if too small
 * [x] load tags and users from config file
 
